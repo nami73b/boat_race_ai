@@ -405,6 +405,8 @@ def main():
                     insert_db_payoff(payoff_data, engine)
                 except KeyboardInterrupt:
                     print("Ctrl-c pressed ...")
+                    logger.info("Ctrl-c pressed ...")
+                    logger.info('Process end!!')
                     sys.exit()
                 except:
                     e = traceback.format_exc()
