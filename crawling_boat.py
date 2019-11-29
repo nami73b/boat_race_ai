@@ -33,6 +33,18 @@ def load_engine():
     }
     return create_engine('mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset={encoding}'.format(**db_settings))
 
+def to_float(x):
+    try:
+        return float(x)
+    except:
+        return None
+
+def to_int(x):
+    try:
+        return int(x)
+    except:
+        return None
+
 def get_data_syussou_hyo(soup, race_date, place_id, race_no):
     race_dct = {}
     player_ar = []
@@ -49,58 +61,58 @@ def get_data_syussou_hyo(soup, race_date, place_id, race_no):
     for rows in soup.find_all('tbody', {'class': ' is-fs12'}):
         player_tmp = {}
         player_tmp['is_miss'] = 'False'
-        player_tmp['bracket_no'] = str(int(rows.find_all('td')[0].get_text()))
+        player_tmp['bracket_no'] = str(to_int(rows.find_all('td')[0].get_text()))
         tmp_cell = rows.find_all('td')[2]
         player_tmp['player_id'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[0].get_text().split()[0]
         player_tmp['player_grade'] = tmp_cell.find_all('span')[0].get_text()
         player_tmp['player_name'] = tmp_cell.find_all('div', {'class': 'is-fs18 is-fBold'})[0].find_all('a')[0].get_text().replace('\u3000', '')
         player_tmp['branch'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[0].split('/')[0]
         player_tmp['born_area'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[0].split('/')[1]
-        player_tmp['age'] = int(tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[1].split('/')[0].replace('歳', ''))
-        player_tmp['f_count'] = int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[0].replace('F', ''))
-        player_tmp['l_count'] = int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[1].replace('L', ''))
-        player_tmp['start_time_avg'] = float(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[2])
-        player_tmp['first_rate_all'] = float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[0])
-        player_tmp['second_rate_all'] = float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[1])
-        player_tmp['third_rate_all'] = float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[2])
-        player_tmp['first_rate_area'] = float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[0])
-        player_tmp['second_rate_area'] = float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[1])
-        player_tmp['third_rate_area'] = float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[2])
-        player_tmp['motor_no'] = int(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[0])
-        player_tmp['motor_within_second_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[1])
-        player_tmp['motor_within_third_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[2])
-        player_tmp['boat_no'] = int(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[0])
-        player_tmp['boat_within_second_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[1])
-        player_tmp['boat_within_third_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[2])
+        player_tmp['age'] = to_int(tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[1].split('/')[0].replace('歳', ''))
+        player_tmp['f_count'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[0].replace('F', ''))
+        player_tmp['l_count'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[1].replace('L', ''))
+        player_tmp['start_time_avg'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[2])
+        player_tmp['first_rate_all'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[0])
+        player_tmp['second_rate_all'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[1])
+        player_tmp['third_rate_all'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[2])
+        player_tmp['first_rate_area'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[0])
+        player_tmp['second_rate_area'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[1])
+        player_tmp['third_rate_area'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[2])
+        player_tmp['motor_no'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[0])
+        player_tmp['motor_within_second_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[1])
+        player_tmp['motor_within_third_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[2])
+        player_tmp['boat_no'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[0])
+        player_tmp['boat_within_second_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[1])
+        player_tmp['boat_within_third_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[2])
         
         player_ar.append(player_tmp)
         
     for rows in soup.find_all('tbody', {'class': ' is-miss is-fs12'}):
         player_tmp = {}
         player_tmp['is_miss'] = 'False'
-        player_tmp['bracket_no'] = str(int(rows.find_all('td')[0].get_text()))
+        player_tmp['bracket_no'] = str(to_int(rows.find_all('td')[0].get_text()))
         tmp_cell = rows.find_all('td')[2]
         player_tmp['player_id'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[0].get_text().split()[0]
         player_tmp['player_grade'] = tmp_cell.find_all('span')[0].get_text()
         player_tmp['player_name'] = tmp_cell.find_all('div', {'class': 'is-fs18 is-fBold'})[0].find_all('a')[0].get_text().replace('\u3000', '')
         player_tmp['branch'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[0].split('/')[0]
         player_tmp['born_area'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[0].split('/')[1]
-        player_tmp['age'] = int(tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[1].split('/')[0].replace('歳', ''))
-        player_tmp['f_count'] = int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[0].replace('F', ''))
-        player_tmp['l_count'] = int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[1].replace('L', ''))
-        player_tmp['start_time_avg'] = float(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[2])
-        player_tmp['first_rate_all'] = float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[0])
-        player_tmp['second_rate_all'] = float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[1])
-        player_tmp['third_rate_all'] = float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[2])
-        player_tmp['first_rate_area'] = float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[0])
-        player_tmp['second_rate_area'] = float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[1])
-        player_tmp['third_rate_area'] = float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[2])
-        player_tmp['motor_no'] = int(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[0])
-        player_tmp['motor_within_second_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[1])
-        player_tmp['motor_within_third_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[2])
-        player_tmp['boat_no'] = int(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[0])
-        player_tmp['boat_within_second_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[1])
-        player_tmp['boat_within_third_rate'] = float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[2])
+        player_tmp['age'] = to_int(tmp_cell.find_all('div', {'class': 'is-fs11'})[1].get_text().split()[1].split('/')[0].replace('歳', ''))
+        player_tmp['f_count'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[0].replace('F', ''))
+        player_tmp['l_count'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[1].replace('L', ''))
+        player_tmp['start_time_avg'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[0].get_text().split()[2])
+        player_tmp['first_rate_all'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[0])
+        player_tmp['second_rate_all'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[1])
+        player_tmp['third_rate_all'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[1].get_text().split()[2])
+        player_tmp['first_rate_area'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[0])
+        player_tmp['second_rate_area'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[1])
+        player_tmp['third_rate_area'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[2].get_text().split()[2])
+        player_tmp['motor_no'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[0])
+        player_tmp['motor_within_second_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[1])
+        player_tmp['motor_within_third_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[3].get_text().split()[2])
+        player_tmp['boat_no'] = to_int(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[0])
+        player_tmp['boat_within_second_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[1])
+        player_tmp['boat_within_third_rate'] = to_float(rows.find_all('td', {'class': 'is-lineH2'})[4].get_text().split()[2])
         
         player_ar.append(player_tmp)
         
@@ -127,12 +139,12 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
     for rows, pre in zip(soup.find_all('tbody', {'class': 'is-fs12 '}), soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr')):
         player_tmp = {}
         player_tmp['bracket_no'] = rows.find_all('td')[0].get_text()
-        player_tmp['weight'] = float(rows.find_all('td')[3].get_text().replace('kg', ''))
-        player_tmp['pre_time'] = float(rows.find_all('td')[4].get_text())
-        player_tmp['tilt_angle'] = float(rows.find_all('td')[5].get_text())
+        player_tmp['weight'] = to_float(rows.find_all('td')[3].get_text().replace('kg', ''))
+        player_tmp['pre_time'] = to_float(rows.find_all('td')[4].get_text())
+        player_tmp['tilt_angle'] = to_float(rows.find_all('td')[5].get_text())
         player_tmp['propeller'] = rows.find_all('td')[6].get_text().replace('\xa0', '')
         player_tmp['parts'] = rows.find_all('td')[7].get_text().replace('\n', '')
-        player_tmp['adjust_weight'] = float(rows.find_all('tr')[2].find_all('td')[0].get_text())
+        player_tmp['adjust_weight'] = to_float(rows.find_all('tr')[2].find_all('td')[0].get_text())
         player_tmp['pre_start_timing'] = pre_start_dct[player_tmp['bracket_no']]
         
         player_ar.append(player_tmp)
@@ -164,7 +176,7 @@ def get_data_result(soup, race_date, place_id, race_no):
     for row in table.find_all('tbody'):
         player_tmp = {}
         player_tmp['bracket_no'] = row.find_all('td')[1].get_text()
-        player_tmp['finish_order'] = int(row.find_all('td', {'class', 'is-fs14'})[0].get_text())
+        player_tmp['finish_order'] = to_int(row.find_all('td', {'class', 'is-fs14'})[0].get_text())
         player_tmp['player_race_time'] = row.find_all('td')[3].get_text().replace('\'', ':').replace('"', ':')
         player_tmp['start_timing'] = start_dct[row.find_all('td')[1].get_text()][0]
         player_tmp['win_pattern'] = start_dct[row.find_all('td')[1].get_text()][1]
@@ -191,15 +203,15 @@ def get_page_source(url):
 
 def preprocessing_race_data(race_data):
     # 距離を数値に変換
-    race_data['distance'] = int(race_data['distance'].replace('m', ''))
+    race_data['distance'] = to_int(race_data['distance'].replace('m', ''))
     # 気温を数値に変換
-    race_data['temperature'] = float(race_data['temperature'].replace('℃', ''))
+    race_data['temperature'] = to_float(race_data['temperature'].replace('℃', ''))
     # 風量を数値に変換
-    race_data['wind'] = int(race_data['wind'].replace('m', ''))
+    race_data['wind'] = to_int(race_data['wind'].replace('m', ''))
     # 水温を数値に変換
-    race_data['water_temperature'] = float(race_data['water_temperature'].replace('℃', ''))
+    race_data['water_temperature'] = to_float(race_data['water_temperature'].replace('℃', ''))
     # 波高を数値に変換
-    race_data['wave_height'] = float(race_data['wave_height'].replace('cm', ''))
+    race_data['wave_height'] = to_float(race_data['wave_height'].replace('cm', ''))
 
     return race_data
 
