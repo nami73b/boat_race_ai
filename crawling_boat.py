@@ -7,6 +7,14 @@ from selenium import webdriver
 from sqlalchemy import create_engine
 import sys
 import traceback
+import logging
+
+logger = logging.getLogger(__name__)
+fh = logging.FileHandler('./log/crawling_boat.log')
+logger.addHandler(fh)
+formatter = logging.Formatter('%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
+fh.setFormatter(formatter)
+logger.setLevel(logging.INFO)
 
 def get_grade(class_names):
     if ['heading2_title', 'is-ippan'] in class_names:
@@ -133,8 +141,14 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
     
     for pre in soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr'):
         pre_start = pre.get_text().split()
-        if pre_start[0] != '':
-            pre_start_dct[pre_start[0]] = pre_start[-1]
+        if len(pre_start) > 0:
+            if pre_start[0] != '':
+                pre_start_dct[pre_start[0]] = pre_start[-1]
+        else:
+            pass
+        for i in range(6):
+            if str(i+1) not in list(pre_start_dct.keys()):
+                pre_start_dct[str(i+1)] = 'NULL'
     
     for rows, pre in zip(soup.find_all('tbody', {'class': 'is-fs12 '}), soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr')):
         player_tmp = {}
@@ -171,6 +185,9 @@ def get_data_result(soup, race_date, place_id, race_no):
     start_dct = {}
     for bracket, start in zip(soup.find_all('table', {'class': 'is-w495'})[1].find_all('tbody')[0].find_all('span', {'class': 'table1_boatImage1Number'}), soup.find_all('table', {'class': 'is-w495'})[1].find_all('tbody')[0].find_all('span', {'class': 'table1_boatImage1TimeInner '})):
         start_dct[bracket.get_text()] = start.get_text().split() if len(start.get_text().split()) == 2 else start.get_text().split() + ['']
+    for i in range(6):
+            if str(i+1) not in list(start_dct.keys()):
+                start_dct[str(i+1)] = ['NULL', 'NULL']
         
     table = soup.find_all('table', {'class': 'is-w495'})[0]
     for row in table.find_all('tbody'):
@@ -310,8 +327,9 @@ def insert_db_payoff(payoff_data, engine):
         engine.execute(insert_txt)
 
 def main():
+    logger.info('Process start!!')
     # 開始日付指定
-    dt = datetime.datetime(2019,11,23)
+    dt = datetime.datetime(2019,11,27)
 
     # ドライバーの読み込み
     # driver = webdriver.Chrome('./chromedriver')
@@ -325,7 +343,7 @@ def main():
     justbefore_url = 'https://boatrace.jp/owpc/pc/race/beforeinfo?rno={race_no}&jcd={place_id}&hd={race_date}'
     # 結果情報URL
     result_url = 'http://boatrace.jp/owpc/pc/race/raceresult?rno={race_no}&jcd={place_id}&hd={race_date}'
-    while True:
+    while dt.strftime('%Y%m%d') != '20000101':
         for place_id in get_course_list(dt.strftime('%Y%m%d')):
             for race_no in [str(i+1) for i in range(12)]:
                 print('race_date: ', dt.strftime('%Y%m%d'),' place_id: ', place_id, ' race_no: ', race_no)
@@ -389,9 +407,13 @@ def main():
                     print("Ctrl-c pressed ...")
                     sys.exit()
                 except:
-                    traceback.print_exc()
+                    e = traceback.format_exc()
+                    print(e)
+                    logger.error(e)
+                    logger.info('Process end!!')
 
         dt -= datetime.timedelta(days=1)
+    logger.info('Process end!!')
 
 if __name__ == '__main__':
 
