@@ -235,7 +235,7 @@ def insert_db(data, table_name, engine):
     value_txt = value_txt[:-1]
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
-
+    insert_txt = insert_txt.replace('None', 'NULL')
     engine.execute(insert_txt)
 
 def insert_db_payoff(payoff_data, engine):
@@ -246,6 +246,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',7,"+str(sub_number)+','
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+','+cmb.split('-')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
     # 三連複
@@ -255,6 +256,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',6,"+str(sub_number)+','
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+','+cmb.split('=')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
     # 二連単
@@ -264,6 +266,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',5,"+str(sub_number)+','
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
     # 二連複
@@ -273,6 +276,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',4,"+str(sub_number)+','
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
     # ワイド
@@ -282,6 +286,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',3,"+str(sub_number)+','
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
     # 複勝
@@ -291,6 +296,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',2,"+str(sub_number)+','
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
     # 単勝
@@ -300,6 +306,7 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',1,"+str(sub_number)+','
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
+        insert_txt = insert_txt.replace('None', 'NULL')
         engine.execute(insert_txt)
 
 def main():
