@@ -4,6 +4,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 from selenium import webdriver
+from sqlalchemy import create_engine
 import sys
 import traceback
 
@@ -20,6 +21,17 @@ def get_grade(class_names):
         return 'SG'
     else:
         np.nan
+
+def load_engine():
+    db_settings = {
+        "host": '192.168.100.45',
+        "database": 'boatrace',
+        "user": 'boat',
+        "password": 'mazikayo',
+        "port": '3306',
+        "encoding": "utf8"
+    }
+    return create_engine('mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset={encoding}'.format(**db_settings))
 
 def get_data_syussou_hyo(soup, race_date, place_id, race_no):
     race_dct = {}
@@ -195,7 +207,7 @@ def preprocessing_player_data(player_data):
     # あとで考えるかも
     return player_data
 
-def make_insert_txt(data, table_name):
+def insert_db(data, table_name, engine):
     col_txt = ''
     value_txt = ''
 
@@ -212,9 +224,9 @@ def make_insert_txt(data, table_name):
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
 
-    print(insert_txt)
+    engine.execute(insert_txt)
 
-def make_insert_txt_payoff(payoff_data):
+def insert_db_payoff(payoff_data, engine):
     # 三連単
     sub_number = 0
     for cmb, payoff in zip(payoff_data['trifecta_cmb'], payoff_data['trifecta_payoff']):
@@ -222,7 +234,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',7,"+str(sub_number)+','
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+','+cmb.split('-')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
     # 三連複
     sub_number = 0
@@ -231,7 +243,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',6,"+str(sub_number)+','
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+','+cmb.split('=')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
     # 二連単
     sub_number = 0
@@ -240,7 +252,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',5,"+str(sub_number)+','
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
     # 二連複
     sub_number = 0
@@ -249,7 +261,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',4,"+str(sub_number)+','
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
     # ワイド
     sub_number = 0
@@ -258,7 +270,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',3,"+str(sub_number)+','
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
     # 複勝
     sub_number = 0
@@ -267,7 +279,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',2,"+str(sub_number)+','
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
     # 単勝
     sub_number = 0
@@ -276,7 +288,7 @@ def make_insert_txt_payoff(payoff_data):
         insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',1,"+str(sub_number)+','
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
-        print(insert_txt)
+        engine.execute(insert_txt)
 
 def main():
     # 開始日付指定
@@ -284,6 +296,9 @@ def main():
 
     # ドライバーの読み込み
     # driver = webdriver.Chrome('./chromedriver')
+
+    # DB接続
+    engine = load_engine()
 
     # 出走表URL
     syussou_hyo_url = 'https://boatrace.jp/owpc/pc/race/racelist?rno={race_no}&jcd={place_id}&hd={race_date}'
@@ -341,15 +356,15 @@ def main():
                     
                     player_data = preprocessing_player_data(player_data)
                     
-                    make_insert_txt(race_data, 'race_detail')
+                    insert_db(race_data, 'race_detail', engine)
                     for i in range(6):
                         player_data[str(i+1)]['race_date'] = race_data['race_date']
                         player_data[str(i+1)]['place_id'] = race_data['place_id']
                         player_data[str(i+1)]['race_no'] = race_data['race_no']
 
-                        make_insert_txt(player_data[str(i+1)], 'race_player')
+                        insert_db(player_data[str(i+1)], 'race_player', engine)
                     
-                    make_insert_txt_payoff(payoff_data)
+                    insert_db_payoff(payoff_data, engine)
                 except KeyboardInterrupt:
                     print("Ctrl-c pressed ...")
                     sys.exit()
