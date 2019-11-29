@@ -309,6 +309,7 @@ def main():
     while True:
         for place_id in get_course_list(dt.strftime('%Y%m%d')):
             for race_no in [str(i+1) for i in range(12)]:
+                print('race_date: ', dt.strftime('%Y%m%d'),' place_id: ', place_id, ' race_no: ', race_no)
                 race_data = {}
                 player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
 
