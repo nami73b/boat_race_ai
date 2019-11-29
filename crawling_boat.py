@@ -63,7 +63,12 @@ def get_data_syussou_hyo(soup, race_date, place_id, race_no):
 
     race_dct['race_name'] = soup.find_all('h2', {'class': 'heading2_titleName'})[0].get_text().replace('\u3000', ' ')
     race_dct['race_grade'] = get_grade([d.get('class') for d in soup.find_all('div')])
-    race_dct['race_grade'] = soup.find_all('span', {'class': 'heading2_titleDetail is-type1'})[0].get_text().split()[0]
+    
+    race_grade = ''
+    for st in soup.find_all('span', {'class': 'heading2_titleDetail is-type1'})[0].get_text().split()[:-1]:
+        race_grade += st
+    race_dct['race_grade'] = race_grade
+
     race_dct['distance'] = soup.find_all('span', {'class': 'heading2_titleDetail is-type1'})[0].get_text().split()[-1]
 
     for rows in soup.find_all('tbody', {'class': ' is-fs12'}):
