@@ -174,7 +174,7 @@ def get_data_result(soup, race_date, place_id, race_no):
     player_tmp = {}
     race_dct = {}
     
-    table = soup.find_all('table', {'class': 'is-w495'})[2]
+    table = soup.find_all('table')[5]
     for row, bet_type in zip(table.find_all('tbody'), ['trifecta', 'trio', 'exacta', 'quinella', 'wide', 'win', 'place']):
         tmp = []
         for text in row.find_all('div', {'class': 'numberSet1_row'}):
