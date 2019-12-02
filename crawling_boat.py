@@ -174,7 +174,7 @@ def get_data_result(soup, race_date, place_id, race_no):
     player_tmp = {}
     race_dct = {}
     
-    table = soup.find_all('table')[5]
+    table = soup.find_all('table')[3]
     for row, bet_type in zip(table.find_all('tbody'), ['trifecta', 'trio', 'exacta', 'quinella', 'wide', 'win', 'place']):
         tmp = []
         for text in row.find_all('div', {'class': 'numberSet1_row'}):
@@ -258,7 +258,8 @@ def insert_db(data, table_name, engine):
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
     insert_txt = insert_txt.replace('None', 'NULL')
-    engine.execute(insert_txt)
+    print(insert_txt)
+    # engine.execute(insert_txt)
 
 def insert_db_payoff(payoff_data, engine):
     # 三連単
@@ -269,7 +270,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+','+cmb.split('-')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
     # 三連複
     sub_number = 0
@@ -279,7 +281,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+','+cmb.split('=')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
     # 二連単
     sub_number = 0
@@ -289,7 +292,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
     # 二連複
     sub_number = 0
@@ -299,7 +303,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
     # ワイド
     sub_number = 0
@@ -309,7 +314,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
     # 複勝
     sub_number = 0
@@ -319,7 +325,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
     # 単勝
     sub_number = 0
@@ -329,12 +336,13 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        engine.execute(insert_txt)
+        print(insert_txt)
+        # engine.execute(insert_txt)
 
 def main():
     logger.info('Process start!!')
     # 開始日付指定
-    dt = datetime.datetime(2019,11,27)
+    dt = datetime.datetime(2019,12,1)
 
     # ドライバーの読み込み
     # driver = webdriver.Chrome('./chromedriver')
