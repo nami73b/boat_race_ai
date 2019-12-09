@@ -193,7 +193,7 @@ def get_data_result(soup, race_date, place_id, race_no):
         race_dct[bet_type+'_payoff'] = tmp
     
     start_dct = {}
-    for bracket, start in zip(soup.find_all('table', {'class': 'is-w495'})[1].find_all('tbody')[0].find_all('span', {'class': 'table1_boatImage1Number'}), soup.find_all('table', {'class': 'is-w495'})[1].find_all('tbody')[0].find_all('span', {'class': 'table1_boatImage1TimeInner '})):
+    for bracket, start in zip(soup.find_all('span', {'class': 'table1_boatImage1Number'}), soup.find_all('span', {'class': 'table1_boatImage1Time'})):
         start_dct[bracket.get_text()] = start.get_text().split() if len(start.get_text().split()) == 2 else start.get_text().split() + ['']
     for i in range(6):
             if str(i+1) not in list(start_dct.keys()):
