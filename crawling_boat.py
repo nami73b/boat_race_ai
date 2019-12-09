@@ -169,6 +169,7 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
         player_tmp['parts'] = rows.find_all('td')[7].get_text().replace('\n', '')
         player_tmp['adjust_weight'] = to_float(rows.find_all('tr')[2].find_all('td')[0].get_text())
         player_tmp['pre_start_timing'] = pre_start_dct[player_tmp['bracket_no']]
+        player_tmp['bracket_order'] = bracket_order[player_tmp['bracket_no']]
         
         player_ar.append(player_tmp)
     return [race_dct, player_ar]
