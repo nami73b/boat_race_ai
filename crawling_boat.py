@@ -60,7 +60,6 @@ def get_data_syussou_hyo(soup, race_date, place_id, race_no):
     race_dct['race_date'] = race_date # 開催日付
     race_dct['place_id'] = place_id # 場コード
     race_dct['race_no'] = race_no # レース番号
-
     race_dct['race_name'] = soup.find_all('h2', {'class': 'heading2_titleName'})[0].get_text().replace('\u3000', ' ')
     race_dct['race_grade'] = get_grade([d.get('class') for d in soup.find_all('div')])
     
@@ -76,6 +75,7 @@ def get_data_syussou_hyo(soup, race_date, place_id, race_no):
         player_tmp['is_miss'] = 'False'
         player_tmp['bracket_no'] = str(to_int(rows.find_all('td')[0].get_text()))
         tmp_cell = rows.find_all('td')[2]
+        player_tmp['race_date_no'] = race_date + "{0:02d}".format(int(race_no))
         player_tmp['player_id'] = tmp_cell.find_all('div', {'class': 'is-fs11'})[0].get_text().split()[0]
         player_tmp['player_grade'] = tmp_cell.find_all('span')[0].get_text()
         player_tmp['player_name'] = tmp_cell.find_all('div', {'class': 'is-fs18 is-fBold'})[0].find_all('a')[0].get_text().replace('\u3000', '')
@@ -136,6 +136,7 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
     player_tmp = {}
     race_dct = {}
     pre_start_dct = {}
+    bracket_order = {}
     race_dct['course_direction'] = soup.find_all('div', {'class': 'weather1_bodyUnit is-direction'})[0].find_all('p')[0].get('class')[-1].replace('is-direction', '')
     race_dct['weather'] = soup.find_all('span', {'class': 'weather1_bodyUnitLabelTitle'})[1].get_text()
     race_dct['temperature'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[0].get_text()
@@ -144,8 +145,9 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
     race_dct['water_temperature'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[2].get_text()
     race_dct['wave_height'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[3].get_text()
     
-    for pre in soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr'):
+    for c, pre in enumerate(soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr')):
         pre_start = pre.get_text().split()
+        bracket_order[pre_start[0]] = c+1
         if len(pre_start) > 0:
             if pre_start[0] != '':
                 pre_start_dct[pre_start[0]] = pre_start[-1]
@@ -154,6 +156,8 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
         for i in range(6):
             if str(i+1) not in list(pre_start_dct.keys()):
                 pre_start_dct[str(i+1)] = 'NULL'
+            if str(i+1) not in list(bracket_order.keys()):
+                bracket_order[str(i+1)] = 'NULL'
     
     for rows, pre in zip(soup.find_all('tbody', {'class': 'is-fs12 '}), soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr')):
         player_tmp = {}
@@ -258,8 +262,8 @@ def insert_db(data, table_name, engine):
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
     insert_txt = insert_txt.replace('None', 'NULL')
-    print(insert_txt)
-    # engine.execute(insert_txt)
+    #print(insert_txt)
+    engine.execute(insert_txt)
 
 def insert_db_payoff(payoff_data, engine):
     # 三連単
@@ -270,8 +274,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+','+cmb.split('-')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
     # 三連複
     sub_number = 0
@@ -281,8 +285,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+','+cmb.split('=')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
     # 二連単
     sub_number = 0
@@ -292,8 +296,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
     # 二連複
     sub_number = 0
@@ -303,8 +307,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
     # ワイド
     sub_number = 0
@@ -314,8 +318,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
     # 複勝
     sub_number = 0
@@ -325,8 +329,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
     # 単勝
     sub_number = 0
@@ -336,13 +340,13 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        #print(insert_txt)
+        engine.execute(insert_txt)
 
 def main():
     logger.info('Process start!!')
     # 開始日付指定
-    dt = datetime.datetime(2019,12,1)
+    dt = datetime.datetime(2019,2,20)
 
     # ドライバーの読み込み
     # driver = webdriver.Chrome('./chromedriver')
