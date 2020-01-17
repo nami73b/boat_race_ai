@@ -32,10 +32,10 @@ def get_grade(class_names):
 
 def load_engine():
     db_settings = {
-        "host": '192.168.100.45',
+        "host": '127.0.0.1',
         "database": 'boatrace',
-        "user": 'boat',
-        "password": 'mazikayo',
+        "user": 'root',
+        "password": '',
         "port": '3306',
         "encoding": "utf8"
     }
@@ -347,7 +347,7 @@ def insert_db_payoff(payoff_data, engine):
 def main():
     logger.info('Process start!!')
     # 開始日付指定
-    dt = datetime.datetime(2019,2,20)
+    dt = datetime.datetime(2020,1,13)
 
     # ドライバーの読み込み
     # driver = webdriver.Chrome('./chromedriver')
@@ -420,7 +420,7 @@ def main():
 
                         insert_db(player_data[str(i+1)], 'race_player', engine)
                     
-                    insert_db_payoff(payoff_data, engine)
+                    # insert_db_payoff(payoff_data, engine)
                 except KeyboardInterrupt:
                     print("Ctrl-c pressed ...")
                     logger.info("Ctrl-c pressed ...")
@@ -429,6 +429,7 @@ def main():
                 except:
                     e = traceback.format_exc()
                     print(e)
+                    logger.error('race_date: ', dt.strftime('%Y%m%d'),' place_id: ', place_id, ' race_no: ', race_no)
                     logger.error(e)
                     logger.info('Process end!!')
 

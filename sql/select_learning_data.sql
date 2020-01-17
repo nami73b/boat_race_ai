@@ -179,46 +179,7 @@ select
     rd3.wind,
     rd3.wind_direction,
     rd3.water_temperature,
-    rd3.wave_height,
-    -- 転覆等完走していない時の扱いを考えなければならない
-    (select
-        count(*)
-    from race_player rpc
-    where rpc.player_id = rp.player_id
-        and rpc.race_date_no < rp.race_date_no
-        ) as player_count,
-
-    (select
-        count(*)
-    from race_player rpc
-    where rpc.player_id = rp.player_id
-        and rpc.finish_order = 1
-        and rpc.race_date_no < rp.race_date_no
-        ) as player_first_count,
-
-    (select
-        count(*)
-    from race_player rpc
-    where rpc.player_id = rp.player_id
-        and rpc.finish_order = 2
-        and rpc.race_date_no < rp.race_date_no
-        ) as player_second_count,
-
-    (select
-        count(*)
-    from race_player rpc
-    where rpc.player_id = rp.player_id
-        and rpc.finish_order = 3
-        and rpc.race_date_no < rp.race_date_no
-        ) as player_third_count,
-
-    (select
-        count(*)
-    from race_player rpc
-    where rpc.player_id = rp.player_id
-        and rpc.finish_order > 3
-        and rpc.race_date_no < rp.race_date_no
-        ) as player_lose_count
+    rd3.wave_height
 
 from (select * from race_player where race_date = '20191111') rp
 inner join race_detail rd
