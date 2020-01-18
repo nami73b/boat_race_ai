@@ -5,6 +5,8 @@ import os
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
 from IPython.display import clear_output
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
 import math
 import gc
 
@@ -33,7 +35,7 @@ class Predict:
         self.place_id = place_id
         self.race_no = race_no
         
-        self.dtypes = pd.read_csv('csv/dtypes.csv')
+        
         
     def insert_racedate_to_df(self):
         # TODO
@@ -299,8 +301,9 @@ class Predict:
         self.df['weight_old3'] = self.df['weight_old3'].apply(lambda x: math.floor(float(x)))
         
     def align_dtypes(self):
+        dtypes = pd.read_csv('csv/dtypes.csv', header = -1, index_col=0)[1]
         for i, c in enumerate(LOAD_DATA_COLUMNS):
-            self.df[c] = self.df[c].astype(self.dtypes[i])
+            self.df[c] = self.df[c].astype(dtypes[i])
             
     def load_model(self, path):
         self.model = lgb.Booster(model_file=path)
@@ -308,8 +311,7 @@ class Predict:
     def get_pred(self):
         output = self.model.predict(self.df.values)
         return output[:,1]/sum(output[:,1])
-    
-    def get_odds_data(self):
+
         
     
     def get_expected_value(self):
@@ -330,7 +332,6 @@ class Predict:
         
         # 予測用データ取得
         self.df = pd.DataFrame(self.get_predict_data(), columns=LOAD_DATA_COLUMNS)
-        
         # 学習データで選手の体重がintになってたから揃える
         # 次直す
         self.weight_to_int()
@@ -346,9 +347,12 @@ class Predict:
         
         # 確率出力
         self.output = self.get_pred()
-        
+
         # 期待値計算
-        print(self.get_expected_value())
+        self.get_expected_value()
+
+        print(self.output)
+        print(self.ex_value)
 
 if __name__ == '__main__':
     predict = Predict('20200113', '16', '1')
