@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+import numpy as np
 import config.config as cfg
 
 def load_engine():
@@ -16,3 +17,25 @@ def to_int(x):
         return int(x)
     except:
         return None
+
+def parts_count(x, key, num):
+    x = str(x)
+    if x.find(key) != -1:
+        if x[x.find(key):].find('×') != -1:
+            return x[x.find(key)+num+1]
+        else:
+            return 1
+    else:
+        return 0
+
+def drop_miss(df):
+    return df[df['is_miss'] == False]
+
+def conv_time(x):
+    if str(x).find('nan') != -1:
+        return x
+    elif str(x).find(':') == -1:
+        return np.nan
+    else:
+        time = x.split(':')
+        return float(time[0])*60 + float(time[1]) + float(time[2])/10
