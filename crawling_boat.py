@@ -263,8 +263,8 @@ def insert_db(data, table_name, engine):
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
     insert_txt = insert_txt.replace('None', 'NULL')
-    # print(insert_txt)
-    engine.execute(insert_txt)
+    print(insert_txt)
+    # engine.execute(insert_txt)
 
 def insert_db_payoff(payoff_data, engine):
     # 三連単

@@ -391,29 +391,29 @@ class Predict:
         # DB更新
         self.insert_racedate_to_df()
         
-        # 予測用データ取得
-        self.df = pd.DataFrame(self.get_predict_data(), columns=LOAD_DATA_COLUMNS)
-        # 学習データで選手の体重がintになってたから揃える
-        # 次直す
-        self.weight_to_int()
+        # # 予測用データ取得
+        # self.df = pd.DataFrame(self.get_predict_data(), columns=LOAD_DATA_COLUMNS)
+        # # 学習データで選手の体重がintになってたから揃える
+        # # 次直す
+        # self.weight_to_int()
         
-        # dtypeを学習用データに揃える
-        self.align_dtypes()
+        # # dtypeを学習用データに揃える
+        # self.align_dtypes()
         
-        # データ前処理
-        self.preprocessing()
+        # # データ前処理
+        # self.preprocessing()
         
-        # モデル読み込み
-        self.load_model('model/first_model_target.txt')
+        # # モデル読み込み
+        # self.load_model('model/first_model_target.txt')
         
-        # 確率出力
-        self.output = self.get_pred()
+        # # 確率出力
+        # self.output = self.get_pred()
 
-        # 期待値計算
-        self.get_expected_value()
+        # # 期待値計算
+        # self.get_expected_value()
 
-        print(self.output)
-        print(self.ex_value)
+        # print(self.output)
+        # print(self.ex_value)
 
 if __name__ == '__main__':
     predict = Predict('20200120', '03', '4')
