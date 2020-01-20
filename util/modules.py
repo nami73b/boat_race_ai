@@ -1,10 +1,18 @@
 from sqlalchemy import create_engine
 import numpy as np
 import config.config as cfg
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+
 
 def load_engine():
     db_settings = cfg.db_settings
     return create_engine('mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset={encoding}'.format(**db_settings))
+
+def get_page_source(url):
+    html = urlopen(url)
+    soup = BeautifulSoup(html,"html.parser")
+    return soup
 
 def to_float(x):
     try:
@@ -27,6 +35,7 @@ def parts_count(x, key, num):
             return 1
     else:
         return 0
+    
 
 def drop_miss(df):
     return df[df['is_miss'] == False]

@@ -3,7 +3,7 @@ def get_odds_win(soup):
     rows = soup.find_all('table', {'class': 'is-w495'})[0].find_all('tbody')
     for row in rows:
         cell = row.find_all('td')
-        if cell[2] != '欠場':
+        if cell[2].get_text() != '欠場':
             odds[cell[0].get_text()] = float(cell[2].get_text())
     return odds
 

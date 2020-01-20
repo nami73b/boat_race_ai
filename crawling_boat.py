@@ -69,8 +69,8 @@ def get_data_syussou_hyo(soup, race_date, place_id, race_no):
     race_dct['race_grade'] = race_grade
 
     race_dct['distance'] = soup.find_all('span', {'class': 'heading2_titleDetail is-type1'})[0].get_text().split()[-1]
-
-    for rows in soup.find_all('tbody', {'class': ' is-fs12'}):
+    
+    for rows in soup.find_all('tbody', {'class': 'is-fs12'}):
         player_tmp = {}
         player_tmp['is_miss'] = 'False'
         player_tmp['bracket_no'] = str(to_int(rows.find_all('td')[0].get_text()))
@@ -100,7 +100,7 @@ def get_data_syussou_hyo(soup, race_date, place_id, race_no):
         
         player_ar.append(player_tmp)
         
-    for rows in soup.find_all('tbody', {'class': ' is-miss is-fs12'}):
+    for rows in soup.find_all('tbody', {'class': 'is-miss is-fs12'}):
         player_tmp = {}
         player_tmp['is_miss'] = 'True'
         player_tmp['bracket_no'] = str(to_int(rows.find_all('td')[0].get_text()))
@@ -263,7 +263,7 @@ def insert_db(data, table_name, engine):
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
     insert_txt = insert_txt.replace('None', 'NULL')
-    #print(insert_txt)
+    # print(insert_txt)
     engine.execute(insert_txt)
 
 def insert_db_payoff(payoff_data, engine):

@@ -9,10 +9,13 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import math
 import gc
+import sys
 
 import config.config as cfg
 import util.modules as mdl
 import util.get_odds as god
+import crawling_boat as cb
+import betting as bt 
 
 LOAD_DATA_COLUMNS = ['race_date', 'place_id', 'race_no', 'race_date_no', 'bracket_no', 'is_miss', 'player_id', 'player_grade', 'branch', 'born_area', 'age', 'weight', 'f_count', 'l_count', 'start_time_avg', 'first_rate_all', 'second_rate_all', 'third_rate_all', 'first_rate_area', 'second_rate_area', 'third_rate_area', 'motor_no', 'motor_within_second_rate', 'motor_within_third_rate', 'boat_no', 'boat_within_second_rate', 'boat_within_third_rate', 'pre_time', 'tilt_angle', 'propeller', 'parts', 'adjust_weight', 'pre_start_timing', 'finish_order', 'player_race_time', 'start_timing', 'win_pattern', 'race_grade', 'distance', 'course_direction', 'weather', 'temperature', 'wind', 'wind_direction', 'water_temperature', 'wave_height', 'race_date_old1', 'place_id_old1', 'race_no_old1', 'bracket_no_old1', 'is_miss_old1', 'player_id_old1', 'player_grade_old1', 'branch_old1', 'born_area_old1', 'age_old1', 'weight_old1', 'f_count_old1', 'l_count_old1', 'start_time_avg_old1', 'first_rate_all_old1', 'second_rate_all_old1', 'third_rate_all_old1', 'first_rate_area_old1', 'second_rate_area_old1', 'third_rate_area_old1', 'motor_no_old1', 'motor_within_second_rate_old1', 'motor_within_third_rate_old1', 'boat_no_old1', 'boat_within_second_rate_old1', 'boat_within_third_rate_old1', 'pre_time_old1', 'tilt_angle_old1', 'propeller_old1', 'parts_old1', 'adjust_weight_old1', 'pre_start_timing_old1', 'finish_order_old1', 'player_race_time_old1', 'start_timing_old1', 'win_pattern_old1', 'race_date_old2', 'place_id_old2', 'race_no_old2', 'bracket_no_old2', 'is_miss_old2', 'player_id_old2', 'player_grade_old2', 'branch_old2', 'born_area_old2', 'age_old2', 'weight_old2', 'f_count_old2', 'l_count_old2', 'start_time_avg_old2', 'first_rate_all_old2', 'second_rate_all_old2', 'third_rate_all_old2', 'first_rate_area_old2', 'second_rate_area_old2', 'third_rate_area_old2', 'motor_no_old2', 'motor_within_second_rate_old2', 'motor_within_third_rate_old2', 'boat_no_old2', 'boat_within_second_rate_old2', 'boat_within_third_rate_old2', 'pre_time_old2', 'tilt_angle_old2', 'propeller_old2', 'parts_old2', 'adjust_weight_old2', 'pre_start_timing_old2', 'finish_order_old2', 'player_race_time_old2', 'start_timing_old2', 'win_pattern_old2', 'race_date_old3', 'place_id_old3', 'race_no_old3', 'bracket_no_old3', 'is_miss_old3', 'player_id_old3', 'player_grade_old3', 'branch_old3', 'born_area_old3', 'age_old3', 'weight_old3', 'f_count_old3', 'l_count_old3', 'start_time_avg_old3', 'first_rate_all_old3', 'second_rate_all_old3', 'third_rate_all_old3', 'first_rate_area_old3', 'second_rate_area_old3', 'third_rate_area_old3', 'motor_no_old3', 'motor_within_second_rate_old3', 'motor_within_third_rate_old3', 'boat_no_old3', 'boat_within_second_rate_old3', 'boat_within_third_rate_old3', 'pre_time_old3', 'tilt_angle_old3', 'propeller_old3', 'parts_old3', 'adjust_weight_old3', 'pre_start_timing_old3', 'finish_order_old3', 'player_race_time_old3', 'start_timing_old3', 'win_pattern_old3', 'race_grade_old1',
                      'distance_old1', 'course_direction_old1', 'weather_old1', 'temperature_old1', 'wind_old1', 'wind_direction_old1', 'water_temperature_old1', 'wave_height_old1', 
@@ -35,11 +38,51 @@ class Predict:
         self.place_id = place_id
         self.race_no = race_no
         
-        
+        self.engine = mdl.load_engine()
         
     def insert_racedate_to_df(self):
-        # TODO
-        print('test')
+        # 出走表URL
+        syussou_hyo_url = 'https://boatrace.jp/owpc/pc/race/racelist?rno={race_no}&jcd={place_id}&hd={race_date}'
+        # 直前情報URL
+        justbefore_url = 'https://boatrace.jp/owpc/pc/race/beforeinfo?rno={race_no}&jcd={place_id}&hd={race_date}'
+        
+        race_data = {}
+        player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
+        
+        url = syussou_hyo_url.format(**{'race_date': self.race_date, 'race_no': self.race_no, 'place_id': self.place_id})
+        soup = mdl.get_page_source(url)
+
+        race_date_tmp, player_data_tmp = cb.get_data_syussou_hyo(soup, self.race_date, self.place_id, self.race_no)
+        
+        for key, value in race_date_tmp.items():
+            race_data[key] = value
+        for player in player_data_tmp:
+            bracket_no = player['bracket_no']
+            for key, value in (player.items()):
+                player_data[bracket_no][key] = value
+
+        url = justbefore_url.format(**{'race_date': self.race_date, 'race_no': self.race_no, 'place_id': self.place_id})
+        soup = mdl.get_page_source(url)
+
+        race_date_tmp, player_data_tmp = cb.get_data_justbefore(soup, self.race_date, self.place_id, self.race_no)
+        for key, value in race_date_tmp.items():
+            race_data[key] = value
+        for player in player_data_tmp:
+            bracket_no = player['bracket_no']
+            for key, value in (player.items()):
+                player_data[bracket_no][key] = value
+        
+        race_data = cb.preprocessing_race_data(race_data)
+                    
+        player_data = cb.preprocessing_player_data(player_data)
+        
+        cb.insert_db(race_data, 'race_detail', self.engine)
+        for i in range(6):
+            player_data[str(i+1)]['race_date'] = race_data['race_date']
+            player_data[str(i+1)]['place_id'] = race_data['place_id']
+            player_data[str(i+1)]['race_no'] = race_data['race_no']
+
+            cb.insert_db(player_data[str(i+1)], 'race_player', self.engine)
         
     def get_predict_data(self):
         # データ取得クエリ作成
@@ -55,8 +98,7 @@ class Predict:
         query = query.format(**race_inf).replace('\n', ' ')
         
         #クエリ実行
-        engine = mdl.load_engine()
-        res = engine.execute(query)
+        res = self.engine.execute(query)
         
         return [r for r in res]
     
@@ -319,16 +361,35 @@ class Predict:
         url = url.format(**{'race_date': self.race_date ,'place_no': "{0:02d}".format(int(self.place_id)), 'race_no': self.race_no})
         html = urlopen(url)
         soup = BeautifulSoup(html,"html.parser")
-        odds_win = god.get_odds_win(soup)
+        self.odds_win = god.get_odds_win(soup)
         
         self.ex_value = {}
-        for pred, odds in zip(self.output, odds_win.items()):
+        for pred, odds in zip(self.output, self.odds_win.items()):
             self.ex_value[odds[0]] = pred*odds[1]
+            
+    def bet(self):
+        bet_list = []
         
+        for pred, ex in zip(self.output, self.ex_value.items()):
+            if ex[1] > 1 and pred > 0.02:
+                1 if cfg.ex_return/(self.odds_win[ex[0]]*100) == 0 else cfg.ex_return/(self.odds_win[ex[0]]*100)
+                
+                bet = {
+                    'bet_type': 1 ,
+                    'bracket1': ex[0],
+                    'bracket2': None,
+                    'bracket3': None,
+                    'amount' : 1 if cfg.ex_return/(self.odds_win[ex[0]]*100) == 0 else cfg.ex_return/(self.odds_win[ex[0]]*100)
+                    }
+                bet_list.append(bet)
+        
+        betting = bt.Betting(self.place_id, self.race_no, bet_list)
+        betting.main_process()
+            
 
     def main_proess(self):
         # DB更新
-        #  self.insert_racedate_to_df()
+        self.insert_racedate_to_df()
         
         # 予測用データ取得
         self.df = pd.DataFrame(self.get_predict_data(), columns=LOAD_DATA_COLUMNS)
@@ -355,6 +416,6 @@ class Predict:
         print(self.ex_value)
 
 if __name__ == '__main__':
-    predict = Predict('20200113', '16', '1')
+    predict = Predict('20200120', '03', '4')
     
     predict.main_proess()

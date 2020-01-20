@@ -6,3 +6,5 @@ db_settings = {
     "port": '3306',
     "encoding": "utf8"
 }
+
+ex_return = 2000
