@@ -7,14 +7,6 @@ from selenium import webdriver
 from sqlalchemy import create_engine
 import sys
 import traceback
-import logging
-
-logger = logging.getLogger(__name__)
-fh = logging.FileHandler('./log/crawling_boat.log')
-logger.addHandler(fh)
-formatter = logging.Formatter('%(asctime)s:%(lineno)d:%(levelname)s:%(message)s')
-fh.setFormatter(formatter)
-logger.setLevel(logging.INFO)
 
 def get_grade(class_names):
     if ['heading2_title', 'is-ippan'] in class_names:
@@ -32,14 +24,16 @@ def get_grade(class_names):
 
 def load_engine():
     db_settings = {
-        "host": '127.0.0.1',
+        "host": '34.85.101.153',
         "database": 'boatrace',
-        "user": 'root',
-        "password": '',
+        "user": 'user',
+        "password": 'mazikayo',
         "port": '3306',
-        "encoding": "utf8"
+        "encoding": "utf8",
+        "db_name": "maximal-boulder-268803:asia-northeast1:boatrace-mysql"
     }
-    return create_engine('mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset={encoding}'.format(**db_settings))
+    # return create_engine('mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset={encoding}'.format(**db_settings))
+    return create_engine('mysql+pymysql://{user}:{password}@/{database}?unix_socket=/cloudsql/{db_name}'.format(**db_settings))
 
 def to_float(x):
     try:
@@ -263,8 +257,8 @@ def insert_db(data, table_name, engine):
 
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
     insert_txt = insert_txt.replace('None', 'NULL')
-    print(insert_txt)
-    # engine.execute(insert_txt)
+    
+    engine.execute(insert_txt)
 
 def insert_db_payoff(payoff_data, engine):
     # 三連単
@@ -275,8 +269,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+','+cmb.split('-')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
     # 三連複
     sub_number = 0
@@ -286,8 +280,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+','+cmb.split('=')[2]+','+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
     # 二連単
     sub_number = 0
@@ -297,8 +291,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
     # 二連複
     sub_number = 0
@@ -308,8 +302,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
     # ワイド
     sub_number = 0
@@ -319,8 +313,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
     # 複勝
     sub_number = 0
@@ -330,8 +324,8 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
     # 単勝
     sub_number = 0
@@ -341,20 +335,20 @@ def insert_db_payoff(payoff_data, engine):
         insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
         sub_number += 1
         insert_txt = insert_txt.replace('None', 'NULL')
-        print(insert_txt)
-        # engine.execute(insert_txt)
+        
+        engine.execute(insert_txt)
 
-def main():
-    logger.info('Process start!!')
-    # 開始日付指定
-    dt = datetime.datetime(2020,2,2)
+def main(request):
+    request_json = request.get_json()
+    date = request_json['race_date']
+    
+    dt = datetime.datetime(int(date[:4]),int(date[4:6]),int(date[6:8]))
 
     # ドライバーの読み込み
     # driver = webdriver.Chrome('./chromedriver')
 
     # DB接続
-    # engine = load_engine()
-    engine = None
+    engine = load_engine()
 
     # 出走表URL
     syussou_hyo_url = 'https://boatrace.jp/owpc/pc/race/racelist?rno={race_no}&jcd={place_id}&hd={race_date}'
@@ -362,80 +356,62 @@ def main():
     justbefore_url = 'https://boatrace.jp/owpc/pc/race/beforeinfo?rno={race_no}&jcd={place_id}&hd={race_date}'
     # 結果情報URL
     result_url = 'http://boatrace.jp/owpc/pc/race/raceresult?rno={race_no}&jcd={place_id}&hd={race_date}'
-    while dt.strftime('%Y%m%d') != '20000101':
-        for place_id in get_course_list(dt.strftime('%Y%m%d')):
-            for race_no in [str(i+1) for i in range(12)]:
-                print('race_date: ', dt.strftime('%Y%m%d'),' place_id: ', place_id, ' race_no: ', race_no)
-                race_data = {}
-                player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
 
-                url = syussou_hyo_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-                soup = get_page_source(url)
+    for place_id in get_course_list(dt.strftime('%Y%m%d')):
+        for race_no in [str(i+1) for i in range(12)]:
+            
+            race_data = {}
+            player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
 
-                # 開催データがない場合の処理
-                try:
-                    race_date_tmp, player_data_tmp = get_data_syussou_hyo(soup, dt.strftime('%Y%m%d'), place_id, race_no)
-                    for key, value in race_date_tmp.items():
-                        race_data[key] = value
-                    for player in player_data_tmp:
-                        bracket_no = player['bracket_no']
-                        for key, value in (player.items()):
-                            player_data[bracket_no][key] = value
+            url = syussou_hyo_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
+            soup = get_page_source(url)
 
-                    url = justbefore_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-                    soup = get_page_source(url)
+            # 開催データがない場合の処理
 
-                    race_date_tmp, player_data_tmp = get_data_justbefore(soup, dt.strftime('%Y%m%d'), place_id, race_no)
-                    for key, value in race_date_tmp.items():
-                        race_data[key] = value
-                    for player in player_data_tmp:
-                        bracket_no = player['bracket_no']
-                        for key, value in (player.items()):
-                            player_data[bracket_no][key] = value
+            race_date_tmp, player_data_tmp = get_data_syussou_hyo(soup, dt.strftime('%Y%m%d'), place_id, race_no)
+            for key, value in race_date_tmp.items():
+                race_data[key] = value
+            for player in player_data_tmp:
+                bracket_no = player['bracket_no']
+                for key, value in (player.items()):
+                    player_data[bracket_no][key] = value
 
-                    url = result_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-                    soup = get_page_source(url)
+            url = justbefore_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
+            soup = get_page_source(url)
 
-                    payoff_data, player_data_tmp = get_data_result(soup, dt.strftime('%Y%m%d'), place_id, race_no)
+            race_date_tmp, player_data_tmp = get_data_justbefore(soup, dt.strftime('%Y%m%d'), place_id, race_no)
+            for key, value in race_date_tmp.items():
+                race_data[key] = value
+            for player in player_data_tmp:
+                bracket_no = player['bracket_no']
+                for key, value in (player.items()):
+                    player_data[bracket_no][key] = value
 
-                    for player in player_data_tmp:
-                        bracket_no = player['bracket_no']
-                        for key, value in (player.items()):
-                            player_data[bracket_no][key] = value
+            url = result_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
+            soup = get_page_source(url)
 
-                    # キー情報
-                    payoff_data['race_date'] = race_data['race_date']
-                    payoff_data['place_id'] = race_data['place_id']
-                    payoff_data['race_no'] = race_data['race_no']
+            payoff_data, player_data_tmp = get_data_result(soup, dt.strftime('%Y%m%d'), place_id, race_no)
 
-                    race_data = preprocessing_race_data(race_data)
-                    
-                    player_data = preprocessing_player_data(player_data)
-                    
-                    insert_db(race_data, 'race_detail', engine)
-                    for i in range(6):
-                        player_data[str(i+1)]['race_date'] = race_data['race_date']
-                        player_data[str(i+1)]['place_id'] = race_data['place_id']
-                        player_data[str(i+1)]['race_no'] = race_data['race_no']
+            for player in player_data_tmp:
+                bracket_no = player['bracket_no']
+                for key, value in (player.items()):
+                    player_data[bracket_no][key] = value
 
-                        insert_db(player_data[str(i+1)], 'race_player', engine)
-                    
-                    insert_db_payoff(payoff_data, engine)
-                except KeyboardInterrupt:
-                    print("Ctrl-c pressed ...")
-                    logger.info("Ctrl-c pressed ...")
-                    logger.info('Process end!!')
-                    sys.exit()
-                except:
-                    e = traceback.format_exc()
-                    print(e)
-                    # logger.error('race_date: ', dt.strftime('%Y%m%d'),' place_id: ', place_id, ' race_no: ', race_no)
-                    logger.error(e)
-                    logger.info('Process end!!')
+            # キー情報
+            payoff_data['race_date'] = race_data['race_date']
+            payoff_data['place_id'] = race_data['place_id']
+            payoff_data['race_no'] = race_data['race_no']
 
-        dt -= datetime.timedelta(days=1)
-    logger.info('Process end!!')
+            race_data = preprocessing_race_data(race_data)
+            
+            player_data = preprocessing_player_data(player_data)
+            
+            insert_db(race_data, 'race_detail', engine)
+            for i in range(6):
+                player_data[str(i+1)]['race_date'] = race_data['race_date']
+                player_data[str(i+1)]['place_id'] = race_data['place_id']
+                player_data[str(i+1)]['race_no'] = race_data['race_no']
 
-if __name__ == '__main__':
-
-    main()
+                insert_db(player_data[str(i+1)], 'race_player', engine)
+            
+            insert_db_payoff(payoff_data, engine)
