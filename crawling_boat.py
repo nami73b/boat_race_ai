@@ -21,9 +21,9 @@ def get_grade(class_names):
         return '一般'
     elif ['heading2_title', 'is-G3b'] in class_names:
         return 'G3'
-    elif ['heading2_title', 'is-G3b'] in class_names:
+    elif ['heading2_title', 'is-G2b'] in class_names:
         return 'G2'
-    elif ['heading2_title', 'is-G3b'] in class_names:
+    elif ['heading2_title', 'is-G1b'] in class_names:
         return 'G1'
     elif ['heading2_title', 'is-SGa'] in class_names:
         return 'SG'

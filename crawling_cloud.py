@@ -13,9 +13,9 @@ def get_grade(class_names):
         return '一般'
     elif ['heading2_title', 'is-G3b'] in class_names:
         return 'G3'
-    elif ['heading2_title', 'is-G3b'] in class_names:
+    elif ['heading2_title', 'is-G2b'] in class_names:
         return 'G2'
-    elif ['heading2_title', 'is-G3b'] in class_names:
+    elif ['heading2_title', 'is-G1b'] in class_names:
         return 'G1'
     elif ['heading2_title', 'is-SGa'] in class_names:
         return 'SG'
@@ -341,12 +341,11 @@ def insert_db_payoff(payoff_data, engine):
 def main(request):
     request_json = request.get_json()
     date = request_json['race_date']
+    place_id = request_json['place_id']
+    race_no = request_json['race_no']
     
     dt = datetime.datetime(int(date[:4]),int(date[4:6]),int(date[6:8]))
-
-    # ドライバーの読み込み
-    # driver = webdriver.Chrome('./chromedriver')
-
+    
     # DB接続
     engine = load_engine()
 
@@ -357,61 +356,61 @@ def main(request):
     # 結果情報URL
     result_url = 'http://boatrace.jp/owpc/pc/race/raceresult?rno={race_no}&jcd={place_id}&hd={race_date}'
 
-    for place_id in get_course_list(dt.strftime('%Y%m%d')):
-        for race_no in [str(i+1) for i in range(12)]:
-            
-            race_data = {}
-            player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
 
-            url = syussou_hyo_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-            soup = get_page_source(url)
 
-            # 開催データがない場合の処理
+    
+    race_data = {}
+    player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
 
-            race_date_tmp, player_data_tmp = get_data_syussou_hyo(soup, dt.strftime('%Y%m%d'), place_id, race_no)
-            for key, value in race_date_tmp.items():
-                race_data[key] = value
-            for player in player_data_tmp:
-                bracket_no = player['bracket_no']
-                for key, value in (player.items()):
-                    player_data[bracket_no][key] = value
+    url = syussou_hyo_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
+    soup = get_page_source(url)
 
-            url = justbefore_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-            soup = get_page_source(url)
+    # 開催データがない場合の処理
 
-            race_date_tmp, player_data_tmp = get_data_justbefore(soup, dt.strftime('%Y%m%d'), place_id, race_no)
-            for key, value in race_date_tmp.items():
-                race_data[key] = value
-            for player in player_data_tmp:
-                bracket_no = player['bracket_no']
-                for key, value in (player.items()):
-                    player_data[bracket_no][key] = value
+    race_date_tmp, player_data_tmp = get_data_syussou_hyo(soup, dt.strftime('%Y%m%d'), place_id, race_no)
+    for key, value in race_date_tmp.items():
+        race_data[key] = value
+    for player in player_data_tmp:
+        bracket_no = player['bracket_no']
+        for key, value in (player.items()):
+            player_data[bracket_no][key] = value
 
-            url = result_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-            soup = get_page_source(url)
+    url = justbefore_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
+    soup = get_page_source(url)
 
-            payoff_data, player_data_tmp = get_data_result(soup, dt.strftime('%Y%m%d'), place_id, race_no)
+    race_date_tmp, player_data_tmp = get_data_justbefore(soup, dt.strftime('%Y%m%d'), place_id, race_no)
+    for key, value in race_date_tmp.items():
+        race_data[key] = value
+    for player in player_data_tmp:
+        bracket_no = player['bracket_no']
+        for key, value in (player.items()):
+            player_data[bracket_no][key] = value
 
-            for player in player_data_tmp:
-                bracket_no = player['bracket_no']
-                for key, value in (player.items()):
-                    player_data[bracket_no][key] = value
+    url = result_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
+    soup = get_page_source(url)
 
-            # キー情報
-            payoff_data['race_date'] = race_data['race_date']
-            payoff_data['place_id'] = race_data['place_id']
-            payoff_data['race_no'] = race_data['race_no']
+    payoff_data, player_data_tmp = get_data_result(soup, dt.strftime('%Y%m%d'), place_id, race_no)
 
-            race_data = preprocessing_race_data(race_data)
-            
-            player_data = preprocessing_player_data(player_data)
-            
-            insert_db(race_data, 'race_detail', engine)
-            for i in range(6):
-                player_data[str(i+1)]['race_date'] = race_data['race_date']
-                player_data[str(i+1)]['place_id'] = race_data['place_id']
-                player_data[str(i+1)]['race_no'] = race_data['race_no']
+    for player in player_data_tmp:
+        bracket_no = player['bracket_no']
+        for key, value in (player.items()):
+            player_data[bracket_no][key] = value
 
-                insert_db(player_data[str(i+1)], 'race_player', engine)
-            
-            insert_db_payoff(payoff_data, engine)
+    # キー情報
+    payoff_data['race_date'] = race_data['race_date']
+    payoff_data['place_id'] = race_data['place_id']
+    payoff_data['race_no'] = race_data['race_no']
+
+    race_data = preprocessing_race_data(race_data)
+    
+    player_data = preprocessing_player_data(player_data)
+    
+    insert_db(race_data, 'race_detail', engine)
+    for i in range(6):
+        player_data[str(i+1)]['race_date'] = race_data['race_date']
+        player_data[str(i+1)]['place_id'] = race_data['place_id']
+        player_data[str(i+1)]['race_no'] = race_data['race_no']
+
+        insert_db(player_data[str(i+1)], 'race_player', engine)
+    
+    insert_db_payoff(payoff_data, engine)
