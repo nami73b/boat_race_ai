@@ -30,4 +30,4 @@ def main(request):
     
     dt = datetime.datetime(int(date[:4]),int(date[4:6]),int(date[6:8]))
     
-    return str(get_course_list(dt.strftime('%Y%m%d')))
+    return str(get_course_list(dt.strftime('%Y%m%d'))).replace('[','').replace(']','')
