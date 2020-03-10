@@ -153,7 +153,7 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
             if str(i+1) not in list(bracket_order.keys()):
                 bracket_order[str(i+1)] = 'NULL'
     
-    for rows, pre in zip(soup.find_all('tbody', {'class': 'is-fs12 '}), soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr')):
+    for rows, pre in zip(soup.find_all('tbody', {'class': 'is-fs12'}), soup.find_all('tbody', {'class': 'is-p10-0'})[0].find_all('tr')):
         player_tmp = {}
         player_tmp['bracket_no'] = rows.find_all('td')[0].get_text()
         player_tmp['weight'] = to_float(rows.find_all('td')[3].get_text().replace('kg', ''))
