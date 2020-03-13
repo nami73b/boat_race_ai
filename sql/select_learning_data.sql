@@ -37,6 +37,7 @@ select
     rp.start_timing,
     rp.win_pattern,
     rd.race_grade,
+    rd.race_class,
     rd.distance,
     rd.course_direction,
     rd.weather,
@@ -154,6 +155,7 @@ select
     rp3.start_timing as start_timing_old3,
     rp3.win_pattern as win_pattern_old3,
     rd1.race_grade as race_grade_old1,
+    rd1.race_class as race_class_old1,
     rd1.distance as distance_old1,
     rd1.course_direction as course_direction_old1,
     rd1.weather as weather_old1,
@@ -163,6 +165,7 @@ select
     rd1.water_temperature as water_temperature_old1,
     rd1.wave_height as wave_height_old1,
     rd2.race_grade as race_grade_old2,
+    rd2.race_class as race_class_old2,
     rd2.distance as distance_old2,
     rd2.course_direction as course_direction_old2,
     rd2.weather as weather_old2,
@@ -172,6 +175,7 @@ select
     rd2.water_temperature as water_temperature_old2,
     rd2.wave_height as wave_height_old2,
     rd3.race_grade as race_grade_old3,
+    rd3.race_class as race_class_old3,
     rd3.distance as distance_old3,
     rd3.course_direction as course_direction_old3,
     rd3.weather as weather_old3,
@@ -181,7 +185,7 @@ select
     rd3.water_temperature as water_temperature_old3,
     rd3.wave_height as wave_height_old3
 
-from (select * from race_player where race_date = '20191111') rp
+from race_player rp
 inner join race_detail rd
     on rd.race_date = rp.race_date
     and rd.place_id = rp.place_id
