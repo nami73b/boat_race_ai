@@ -8,7 +8,7 @@ import traceback
 
 INDEX_URL = 'https://www.boatrace.jp/owpc/pc/race/index'
 
-def get_future_racetime():
+def get_future_racetime(request):
     html = urlopen(INDEX_URL)
     soup = BeautifulSoup(html,"html.parser")
     
@@ -24,5 +24,6 @@ def get_future_racetime():
         race_inf['vote_deadline'] = row.find_all('tr')[1].find_all('td')[1].get_text()
         race_list.append(race_inf)
     race_list.sort(key=lambda x: x['vote_deadline'])
+
     
-    return str(race_list).replace('[','').replace(']','').replace(' ', '')
+    return str(race_list).replace('[','').replace(']','').replace(' ', '').replace("'", '"').replace('},{', '}-,-{')

@@ -240,15 +240,6 @@ def preprocessing_player_data(player_data):
     # あとで考えるかも
     return player_data
 
-def delete_db(race_data, engine):
-    query = """
-                delete from race_detail where race_date = "{race_date}" and place_id = "{place_id}" and race_no = "{race_no}";
-                delete from race_player where race_date = "{race_date}" and place_id = "{place_id}" and race_no = "{race_no}";
-                delete from race_payoff where race_date = "{race_date}" and place_id = "{place_id}" and race_no = "{race_no}"
-            """
-    for q in query.split(';'):
-        engine.execute(q.format(**race_data))
-
 def insert_db(data, table_name, engine):
     col_txt = ''
     value_txt = ''
@@ -264,89 +255,10 @@ def insert_db(data, table_name, engine):
     col_txt = col_txt[:-1]
     value_txt = value_txt[:-1]
 
-    
     insert_txt = 'insert into '+table_name+' (' + col_txt + ') values('+value_txt+')'
     insert_txt = insert_txt.replace('None', 'NULL')
     
     engine.execute(insert_txt)
-
-def insert_db_payoff(payoff_data, engine):
-    # 三連単
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['trifecta_cmb'], payoff_data['trifecta_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',7,"+str(sub_number)+','
-        insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+','+cmb.split('-')[2]+','+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
-
-    # 三連複
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['trio_cmb'], payoff_data['trio_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',6,"+str(sub_number)+','
-        insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+','+cmb.split('=')[2]+','+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
-
-    # 二連単
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['exacta_cmb'], payoff_data['exacta_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',5,"+str(sub_number)+','
-        insert_txt += cmb.split('-')[0]+','+cmb.split('-')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
-
-    # 二連複
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['quinella_cmb'], payoff_data['quinella_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',4,"+str(sub_number)+','
-        insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
-
-    # ワイド
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['wide_cmb'], payoff_data['wide_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',3,"+str(sub_number)+','
-        insert_txt += cmb.split('=')[0]+','+cmb.split('=')[1]+',null,'+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
-
-    # 複勝
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['place_cmb'], payoff_data['place_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',2,"+str(sub_number)+','
-        insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
-
-    # 単勝
-    sub_number = 0
-    for cmb, payoff in zip(payoff_data['win_cmb'], payoff_data['win_payoff']):
-        insert_txt = 'insert into race_payoff (race_date, place_id, race_no, bet_type, sub_number, bracket1, bracket2, bracket3, payoff)'
-        insert_txt += "values('"+payoff_data['race_date']+"','"+payoff_data['place_id']+"','"+payoff_data['race_no']+"',1,"+str(sub_number)+','
-        insert_txt += cmb+',null,null,'+payoff.replace(',','').replace('¥', '')+')'
-        sub_number += 1
-        insert_txt = insert_txt.replace('None', 'NULL')
-        
-        engine.execute(insert_txt)
 
 def main(request):
     request_json = request.get_json()
@@ -363,11 +275,6 @@ def main(request):
     syussou_hyo_url = 'https://boatrace.jp/owpc/pc/race/racelist?rno={race_no}&jcd={place_id}&hd={race_date}'
     # 直前情報URL
     justbefore_url = 'https://boatrace.jp/owpc/pc/race/beforeinfo?rno={race_no}&jcd={place_id}&hd={race_date}'
-    # 結果情報URL
-    result_url = 'http://boatrace.jp/owpc/pc/race/raceresult?rno={race_no}&jcd={place_id}&hd={race_date}'
-
-
-
     
     race_data = {}
     player_data = {'1': {}, '2': {}, '3': {}, '4': {}, '5': {}, '6': {}}
@@ -396,26 +303,10 @@ def main(request):
         for key, value in (player.items()):
             player_data[bracket_no][key] = value
 
-    url = result_url.format(**{'race_date': dt.strftime('%Y%m%d'), 'race_no': race_no, 'place_id': place_id})
-    soup = get_page_source(url)
-
-    payoff_data, player_data_tmp = get_data_result(soup, dt.strftime('%Y%m%d'), place_id, race_no)
-
-    for player in player_data_tmp:
-        bracket_no = player['bracket_no']
-        for key, value in (player.items()):
-            player_data[bracket_no][key] = value
-
-    # キー情報
-    payoff_data['race_date'] = race_data['race_date']
-    payoff_data['place_id'] = race_data['place_id']
-    payoff_data['race_no'] = race_data['race_no']
-
     race_data = preprocessing_race_data(race_data)
     
     player_data = preprocessing_player_data(player_data)
     
-    delete_db(race_data, engine)
     insert_db(race_data, 'race_detail', engine)
     for i in range(6):
         player_data[str(i+1)]['race_date'] = race_data['race_date']
@@ -423,5 +314,3 @@ def main(request):
         player_data[str(i+1)]['race_no'] = race_data['race_no']
 
         insert_db(player_data[str(i+1)], 'race_player', engine)
-    
-    insert_db_payoff(payoff_data, engine)
