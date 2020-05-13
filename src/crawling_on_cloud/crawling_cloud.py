@@ -13,11 +13,19 @@ def get_grade(class_names):
         return '一般'
     elif ['heading2_title', 'is-G3b'] in class_names:
         return 'G3'
+    elif ['heading2_title', 'is-G3a'] in class_names:
+        return 'G3'
     elif ['heading2_title', 'is-G2b'] in class_names:
+        return 'G2'
+    elif ['heading2_title', 'is-G2a'] in class_names:
         return 'G2'
     elif ['heading2_title', 'is-G1b'] in class_names:
         return 'G1'
+    elif ['heading2_title', 'is-G1a'] in class_names:
+        return 'G1'
     elif ['heading2_title', 'is-SGa'] in class_names:
+        return 'SG'
+    elif ['heading2_title', 'is-SGb'] in class_names:
         return 'SG'
     else:
         np.nan

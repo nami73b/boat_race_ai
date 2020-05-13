@@ -66,7 +66,8 @@ class validation:
             # 三連単
             for i in payoff.index:
                 if bet_dct['bracket1'] == payoff.ix[i]['bracket1'] \
-                  and bet_dct['bracket2'] == payoff.ix[i]['bracket2']:
+                  and bet_dct['bracket2'] == payoff.ix[i]['bracket2'] \
+                  and bet_dct['bracket3'] == payoff.ix[i]['bracket3']:
                     dividend += payoff.ix[i]['payoff']*bet_dct['amount']
             
         else:
