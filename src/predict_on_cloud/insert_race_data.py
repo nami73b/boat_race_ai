@@ -13,11 +13,19 @@ def get_grade(class_names):
         return '一般'
     elif ['heading2_title', 'is-G3b'] in class_names:
         return 'G3'
+    elif ['heading2_title', 'is-G3a'] in class_names:
+        return 'G3'
     elif ['heading2_title', 'is-G2b'] in class_names:
+        return 'G2'
+    elif ['heading2_title', 'is-G2a'] in class_names:
         return 'G2'
     elif ['heading2_title', 'is-G1b'] in class_names:
         return 'G1'
+    elif ['heading2_title', 'is-G1a'] in class_names:
+        return 'G1'
     elif ['heading2_title', 'is-SGa'] in class_names:
+        return 'SG'
+    elif ['heading2_title', 'is-SGb'] in class_names:
         return 'SG'
     else:
         np.nan
@@ -135,7 +143,7 @@ def get_data_justbefore(soup, race_date, place_id, race_no):
     race_dct['weather'] = soup.find_all('span', {'class': 'weather1_bodyUnitLabelTitle'})[1].get_text()
     race_dct['temperature'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[0].get_text()
     race_dct['wind'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[1].get_text()
-    race_dct['wind_direction'] = soup.find_all('div', {'class': 'weather1_bodyUnit is-windDirection'})[0].find_all('p')[0].get('class')[-1].replace('is-wind', '')
+    race_dct['wind_direction'] = soup.find_all('div', {'class': 'weather1_bodyUnit is-windDirection'})[0].find_all('p')[0].get('class')[-1].replace('is-wind', '').replace('weather1_bodyUnitImage', '17')
     race_dct['water_temperature'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[2].get_text()
     race_dct['wave_height'] = soup.find_all('span', ('class', 'weather1_bodyUnitLabelData'))[3].get_text()
     

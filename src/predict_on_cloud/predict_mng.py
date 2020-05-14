@@ -239,8 +239,8 @@ def thred_tsk(race_date, place_id, race_no, vote_deadline):
         time.sleep(10) 
     print('Success:predict_race')
     
-    # betting = Betting(place_id, race_no)
-    # betting.open_betting_page()
+    betting = Betting(place_id, race_no)
+    betting.open_betting_page()
     
     while True:
         if (datetime.datetime.now()+datetime.timedelta(minutes=1)).strftime('%H:%M') == vote_deadline:
@@ -270,8 +270,7 @@ def thred_tsk(race_date, place_id, race_no, vote_deadline):
                     print(bet)
                     bet_list.append(bet)
                     
-            # betting = Betting(place_id, race_no)
-            # betting.do_bet(bet_list)
+            betting.do_bet(bet_list)
             tweet_result(race_date, place_id, race_no, bet_list)
             break
         time.sleep(5)

@@ -46,6 +46,7 @@ def main(args):
                             break
                         else:
                             print('retry_count:',i)
+                            time.sleep(30)
                     print(res.text)
                     print('place_id: ', place_id, 'race_no: ', race_no, res.status_code)
                     time.sleep(0.5)
